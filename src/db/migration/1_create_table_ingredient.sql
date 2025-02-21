@@ -11,7 +11,7 @@ CREATE TABLE if not exists ingredient
     (
         id INT PRIMARY KEY,
         name VARCHAR(255),
-        unit_price INT,
+        unit_price NUMERIC,
         unit unit,
         update_datetime DATE
     );
