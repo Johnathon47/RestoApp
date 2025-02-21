@@ -7,5 +7,7 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" exported="" name="au.dius.pact.jvm.consumer.junit5" level="project" />
+    <orderEntry type="library" name="postgresql-42.7.5" level="project" />
   </component>
 </module>
