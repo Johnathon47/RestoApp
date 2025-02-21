@@ -1,1 +1,1 @@
-# RestoApp
+# Restaurant management app
