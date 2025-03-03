@@ -7,8 +7,14 @@ public class Dish {
     private int id;
     private String name;
     private BigDecimal unitPrice;
-    private List<Ingredient> ingredientList;
+    private List<DishIngredient> ingredientList;
 
+    public Dish (int id, String name, BigDecimal unitPrice, List<DishIngredient> listIngredient){
+        this.id = id;
+        this.name = name;
+        this.unitPrice = unitPrice;
+        this.ingredientList = listIngredient;
+    };
     public Dish () {}
 
     public int getId() {
@@ -35,11 +41,11 @@ public class Dish {
         this.unitPrice = unitPrice;
     }
 
-    public List<Ingredient> getIngredientList() {
+    public List<DishIngredient> getIngredientList() {
         return ingredientList;
     }
 
-    public void setIngredientList(List<Ingredient> ingredientList) {
+    public void setIngredientList(List<DishIngredient> ingredientList) {
         this.ingredientList = ingredientList;
     }
 

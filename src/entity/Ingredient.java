@@ -1,7 +1,7 @@
 package entity;
 
 import java.math.BigDecimal;
-import java.util.Date;
+import java.sql.Timestamp;
 import java.util.Objects;
 
 public class Ingredient {
@@ -9,7 +9,19 @@ public class Ingredient {
     protected String name;
     private BigDecimal unitPrice;
     private Unit unit;
-    private Date updateDateTime;
+    private Timestamp updateDateTime;
+
+    public Ingredient(int id, String name, BigDecimal unitPrice, Unit unit, Timestamp updateDateTime) {
+        this.id = id;
+        this.name = name;
+        this.unitPrice = unitPrice;
+        this.unit = unit;
+        this.updateDateTime = updateDateTime;
+    }
+
+    public Ingredient (String name) {
+        this.name = name;
+    }
 
     public Ingredient() {}
 
@@ -45,11 +57,11 @@ public class Ingredient {
         this.unit = unit;
     }
 
-    public Date getUpdateDateTime() {
+    public Timestamp getUpdateDateTime() {
         return updateDateTime;
     }
 
-    public void setUpdateDateTime(Date updateDateTime) {
+    public void setUpdateDateTime(Timestamp updateDateTime) {
         this.updateDateTime = updateDateTime;
     }
 

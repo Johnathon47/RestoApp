@@ -13,5 +13,5 @@ CREATE TABLE if not exists ingredient
         name VARCHAR(255),
         unit_price NUMERIC,
         unit unit,
-        update_datetime DATE
+        update_datetime TIMESTAMP
     );

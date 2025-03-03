@@ -4,16 +4,43 @@ import db.DataSource;
 import entity.Ingredient;
 import entity.Unit;
 
-import java.math.BigDecimal;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class IngredientDao implements CrudOperations<Ingredient>{
     private final DataSource dataSource = new DataSource();
+
+
+    public List<Ingredient> saveAll(List<Ingredient> ingredients) {
+        String query = "INSERT INTO ingredient (id, name, unit_price, unit, update_datetime) " +
+                "VALUES (?, ?, ?, ?::unit, ?) " +
+                "ON CONFLICT (id) DO UPDATE " +
+                "SET name = EXCLUDED.name, " +
+                "    unit_price = EXCLUDED.unit_price, " +
+                "    unit = EXCLUDED.unit, " +
+                "    update_datetime = EXCLUDED.update_datetime";
+
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+
+            for (Ingredient ingredient : ingredients) {
+                statement.setInt(1, ingredient.getId());
+                statement.setString(2, ingredient.getName());
+                statement.setBigDecimal(3, ingredient.getUnitPrice());
+                statement.setString(4, ingredient.getUnit().name()); // Attention si Unit est ENUM
+                statement.setTimestamp(5, ingredient.getUpdateDateTime());
+
+                statement.executeUpdate(); // Exécute un par un, pas de batch !
+            }
+
+            return ingredients; // Retourne la liste après sauvegarde
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Erreur lors de l'enregistrement de l'ingrédient", e);
+        }
+    }
+
 
 
     @Override
@@ -29,9 +56,9 @@ public class IngredientDao implements CrudOperations<Ingredient>{
                 Ingredient ingredient = new Ingredient();
                 ingredient.setId(resultSet.getInt("id"));
                 ingredient.setName(resultSet.getString("name"));
-                ingredient.setUnitPrice(BigDecimal.valueOf(resultSet.getInt("unit_price")));
+                ingredient.setUnitPrice(resultSet.getBigDecimal("unit_price"));
                 ingredient.setUnit(Unit.valueOf(resultSet.getString("unit")));
-                ingredient.setUpdateDateTime(resultSet.getDate("update_datetime"));
+                ingredient.setUpdateDateTime(resultSet.getTimestamp("update_datetime"));
                 ingredients.add(ingredient);
             }
             return ingredients;
@@ -41,7 +68,39 @@ public class IngredientDao implements CrudOperations<Ingredient>{
     }
 
     @Override
-    public Ingredient findById(List<Ingredient> list, int E_id) {
-        return null;
+    public Ingredient findById(int id_ingredient) {
+        String query = "SELECT i.id, i.name, i.unit_price, i.unit, i.update_datetime FROM ingredient i WHERE id = ?;";
+        try (Connection connection = dataSource.getConnection();
+            PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            preparedStatement.setInt(1,id_ingredient);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                Ingredient ingredient = new Ingredient();
+                while (resultSet.next()) {
+                    ingredient.setId(resultSet.getInt("id"));
+                    ingredient.setName(resultSet.getString("name"));
+                    ingredient.setUnitPrice(resultSet.getBigDecimal("unit_price"));
+                    ingredient.setUnit(Unit.valueOf(resultSet.getString("unit")));
+                    ingredient.setUpdateDateTime(resultSet.getTimestamp("update_datetime"));
+                }
+                return ingredient;
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public boolean deleteOperation(int id) {
+        String query = "DELETE FROM ingredient WHERE id = ?;";
+
+        try (PreparedStatement preparedStatement = dataSource.getConnection().prepareStatement(query)) {
+            preparedStatement.setInt(1, id);
+            int rowsAffected = preparedStatement.executeUpdate();
+
+            // Vérifie si la ligne a été supprimé
+            return rowsAffected > 0;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

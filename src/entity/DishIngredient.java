@@ -4,33 +4,24 @@ import java.math.BigDecimal;
 import java.util.Objects;
 
 public class DishIngredient extends Ingredient {
-    private int idDish;
-    private int idIngredient;
+    private Ingredient ingredient;
     private BigDecimal requiredQuantity;
     private Unit unit;
 
     public DishIngredient() {}
 
-    public DishIngredient(String name, BigDecimal requiredQuality, Unit unit) {
-        this.name = name;
+    public DishIngredient(Ingredient ingredient, BigDecimal requiredQuality, Unit unit) {
+        this.ingredient = ingredient;
         this.requiredQuantity = requiredQuality;
         this.unit = unit;
     }
 
-    public int getIdDish() {
-        return idDish;
+    public Ingredient getIngredient() {
+        return ingredient;
     }
 
-    public void setIdDish(int idDish) {
-        this.idDish = idDish;
-    }
-
-    public int getIdIngredient() {
-        return idIngredient;
-    }
-
-    public void setIdIngredient(int idIngredient) {
-        this.idIngredient = idIngredient;
+    public void setIngredient(Ingredient ingredient) {
+        this.ingredient = ingredient;
     }
 
     public BigDecimal getRequiredQuantity() {
@@ -41,32 +32,37 @@ public class DishIngredient extends Ingredient {
         this.requiredQuantity = requiredQuantity;
     }
 
+    @Override
     public Unit getUnit() {
         return unit;
     }
 
+    @Override
     public void setUnit(Unit unit) {
         this.unit = unit;
     }
 
     @Override
     public String toString() {
-        return "\n      DishIngredient{" +
-                "\n         name=" + name +
-                ",\n        requiredQuantity=" + requiredQuantity +
-                ",\n        unit='" + unit + '\'' +
+        return "DishIngredient{" +
+                "name=" + ingredient.getName() +
+                ", requiredQuantity=" + requiredQuantity +
+                ", unit=" + unit + '\'' +
                 '}';
     }
 
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
         DishIngredient that = (DishIngredient) o;
-        return idDish == that.idDish && idIngredient == that.idIngredient && requiredQuantity == that.requiredQuantity && unit == that.unit;
+        return Objects.equals(ingredient, that.ingredient) &&
+                Objects.equals(requiredQuantity, that.requiredQuantity) &&
+                unit == that.unit;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(idDish, idIngredient, requiredQuantity, unit);
+        return Objects.hash(super.hashCode(), ingredient, requiredQuantity, unit);
     }
 }
