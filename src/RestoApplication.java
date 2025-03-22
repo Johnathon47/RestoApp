@@ -1,13 +1,13 @@
 import dao.DishDao;
+import dao.DishOrderDao;
 import dao.IngredientDao;
-import entity.Dish;
-import entity.DishIngredient;
-import entity.Ingredient;
-import entity.Unit;
+import entity.*;
 
 import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -21,7 +21,7 @@ public class RestoApplication {
         //List<Ingredient> ingredients = ingredientDao.getAll(1,5);
         //ingredients.add(newingredient);
         //List<Ingredient> ingredientsUpdate = ingredientDao.saveAll(ingredients);
-        DishDao dishDao = new DishDao();
+        //DishDao dishDao = new DishDao();
         /*
         System.out.println(list);
 
@@ -35,6 +35,16 @@ public class RestoApplication {
         dishDao.saveAll(Arrays.asList(dish));*/
 
         //dishDao.deleteOperation(3);
+        Order order = new Order(Instant.now(),11000.00,11000.00,TableNumber.TABLE_1,1);
+        List<DishIngredient> dishIngredients = new ArrayList<>();
+        Dish dish = new Dish(1,"Hot Dog", dishIngredients);
+        DishOrder dishOrder = new DishOrder(1,dish,2.0,order);
+        List<DishOrder> dishOrders = new ArrayList<>();
+        dishOrders.add(dishOrder);
+
+        DishOrderDao dishOrderDao = new DishOrderDao();
+        dishOrderDao.saveAll(dishOrders);
+
 
     }
 }
