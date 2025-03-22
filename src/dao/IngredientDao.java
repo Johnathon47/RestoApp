@@ -25,7 +25,7 @@ public class IngredientDao implements CrudOperations<Ingredient>{
              PreparedStatement statement = connection.prepareStatement(query)) {
 
             for (Ingredient ingredient : ingredients) {
-                statement.setInt(1, ingredient.getId());
+                statement.setLong(1, ingredient.getId());
                 statement.setString(2, ingredient.getName());
                 statement.setBigDecimal(3, ingredient.getUnitPrice());
                 statement.setString(4, ingredient.getUnit().name()); // Attention si Unit est ENUM
@@ -49,7 +49,7 @@ public class IngredientDao implements CrudOperations<Ingredient>{
         try (Connection connection = dataSource.getConnection()) {
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setInt(1, limit);
-            preparedStatement.setInt(2, (limit * (offset -1)));
+            preparedStatement.setInt(2, (limit * (offset - 1)));
             ResultSet resultSet = preparedStatement.executeQuery();
             List<Ingredient> ingredients = new ArrayList<>();
             while (resultSet.next()) {
