@@ -118,7 +118,7 @@ public class DishDao implements CrudOperations<Dish>{
 
 
     @Override
-    public Dish findById(int dishId) {
+    public Dish findById(long dishId) {
         String sql = "SELECT dish.id, dish.name, dish.unit_price, ingredient.name AS ingredientName, \n" +
                 "       dish_ingredient.required_quantity, dish_ingredient.unit \n" +
                 "FROM dish \n" +
@@ -129,7 +129,7 @@ public class DishDao implements CrudOperations<Dish>{
         try (Connection connection = dataSource.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
 
-            preparedStatement.setInt(1, dishId);
+            preparedStatement.setLong(1, dishId);
 
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 Dish dish = null;
@@ -164,11 +164,11 @@ public class DishDao implements CrudOperations<Dish>{
 
 
     @Override
-    public boolean deleteOperation(int id) {
+    public boolean deleteOperation(long id) {
         String query = "DELETE FROM dish WHERE id = ?";
 
         try (PreparedStatement preparedStatement = dataSource.getConnection().prepareStatement(query)) {
-            preparedStatement.setInt(1, id);
+            preparedStatement.setLong(1, id);
             int rowAffected = preparedStatement.executeUpdate();
 
             return rowAffected > 0;
