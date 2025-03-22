@@ -9,7 +9,7 @@ $$;
 
 CREATE TABLE if not exists ingredient
     (
-        id INT PRIMARY KEY,
+        id BIGINT PRIMARY KEY,
         name VARCHAR(255),
         unit_price NUMERIC,
         unit unit,

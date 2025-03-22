@@ -1,7 +1,7 @@
 CREATE TABLE if not exists dish_ingredient
     (
-        id_dish INT,
-        id_ingredient INT,
+        id_dish BIGINT,
+        id_ingredient BIGINT,
         required_quantity NUMERIC,
         unit unit,
         PRIMARY KEY (id_dish, id_ingredient),
