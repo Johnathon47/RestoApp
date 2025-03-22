@@ -4,24 +4,22 @@ import java.math.BigDecimal;
 import java.util.List;
 
 public class Dish {
-    private int id;
+    private long id;
     private String name;
-    private BigDecimal unitPrice;
     private List<DishIngredient> ingredientList;
 
-    public Dish (int id, String name, BigDecimal unitPrice, List<DishIngredient> listIngredient){
+    public Dish (long id, String name, List<DishIngredient> listIngredient){
         this.id = id;
         this.name = name;
-        this.unitPrice = unitPrice;
         this.ingredientList = listIngredient;
     };
     public Dish () {}
 
-    public int getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(long id) {
         this.id = id;
     }
 
@@ -33,12 +31,19 @@ public class Dish {
         this.name = name;
     }
 
-    public BigDecimal getUnitPrice() {
-        return unitPrice;
-    }
-
-    public void setUnitPrice(BigDecimal unitPrice) {
-        this.unitPrice = unitPrice;
+    public BigDecimal getIngredientCost() {
+        BigDecimal total = BigDecimal.valueOf(0);
+        return ingredientList.stream()
+                .map(dishIngredient -> dishIngredient.getIngredient()
+                        .getUnitPrice()
+                        .multiply(dishIngredient.getRequiredQuantity()))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        /*for (DishIngredient dishIngredient: ingredientList) {
+            Ingredient ingredient = dishIngredient.getIngredient();
+            BigDecimal ingredientCost = ingredient.getUnitPrice().multiply(dishIngredient.getRequiredQuantity());
+            total = total.add(ingredientCost);
+        }
+        return total;*/
     }
 
     public List<DishIngredient> getIngredientList() {
@@ -54,7 +59,7 @@ public class Dish {
         return "Dish{" +
                 " \n  id=" + id +
                 ",\n name='" + name + '\'' +
-                ",\n unitPrice=" + unitPrice +
+                ",\n unitPrice=" +
                 ",\n ingredientList=" + ingredientList +
                 '}';
     }
