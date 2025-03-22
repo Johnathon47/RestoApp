@@ -6,7 +6,6 @@ import entity.Unit;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
-import java.sql.Date;
 import java.sql.Timestamp;
 import java.util.List;
 
@@ -32,7 +31,7 @@ class IngredientDaoTest {
         expectedIngredient.setName("Saucisse");
         expectedIngredient.setUnitPrice(BigDecimal.valueOf(20));
         expectedIngredient.setUnit(Unit.G);
-        expectedIngredient.setUpdateDateTime(Timestamp.valueOf("2025-01-01"));
+        expectedIngredient.setUpdateDateTime(Timestamp.valueOf("2025-01-01 00:00:00"));
 
         return expectedIngredient;
     }
