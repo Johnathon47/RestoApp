@@ -5,13 +5,13 @@ import java.sql.Timestamp;
 import java.util.Objects;
 
 public class Ingredient {
-    private int id;
+    private long id;
     protected String name;
     private BigDecimal unitPrice;
     private Unit unit;
     private Timestamp updateDateTime;
 
-    public Ingredient(int id, String name, BigDecimal unitPrice, Unit unit, Timestamp updateDateTime) {
+                                                                                                                                    public Ingredient(long id, String name, BigDecimal unitPrice, Unit unit, Timestamp updateDateTime) {
         this.id = id;
         this.name = name;
         this.unitPrice = unitPrice;
@@ -25,11 +25,11 @@ public class Ingredient {
 
     public Ingredient() {}
 
-    public int getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(long id) {
         this.id = id;
     }
 
