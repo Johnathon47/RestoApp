@@ -68,11 +68,11 @@ public class IngredientDao implements CrudOperations<Ingredient>{
     }
 
     @Override
-    public Ingredient findById(int id_ingredient) {
+    public Ingredient findById(long id_ingredient) {
         String query = "SELECT i.id, i.name, i.unit_price, i.unit, i.update_datetime FROM ingredient i WHERE id = ?;";
         try (Connection connection = dataSource.getConnection();
             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
-            preparedStatement.setInt(1,id_ingredient);
+            preparedStatement.setLong(1,id_ingredient);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 Ingredient ingredient = new Ingredient();
                 while (resultSet.next()) {
@@ -90,11 +90,11 @@ public class IngredientDao implements CrudOperations<Ingredient>{
     }
 
     @Override
-    public boolean deleteOperation(int id) {
+    public boolean deleteOperation(long id) {
         String query = "DELETE FROM ingredient WHERE id = ?;";
 
         try (PreparedStatement preparedStatement = dataSource.getConnection().prepareStatement(query)) {
-            preparedStatement.setInt(1, id);
+            preparedStatement.setLong(1, id);
             int rowsAffected = preparedStatement.executeUpdate();
 
             // Vérifie si la ligne a été supprimé
