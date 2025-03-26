@@ -1,7 +1,6 @@
 package dao;
 
 import db.DataSource;
-import entity.Dish;
 import entity.DishAvailability;
 
 import java.sql.Connection;
