@@ -1,6 +1,7 @@
 import dao.DishDao;
 import dao.DishOrderDao;
 import dao.IngredientDao;
+import dao.OrderDao;
 import entity.*;
 
 import java.math.BigDecimal;
@@ -35,16 +36,26 @@ public class RestoApplication {
         dishDao.saveAll(Arrays.asList(dish));*/
 
         //dishDao.deleteOperation(3);
-        Order order = new Order(Instant.now(),11000.00,11000.00,TableNumber.TABLE_1,1);
+        Order order = new Order(Instant.now(),11000.00,13000.00,TableNumber.TABLE1,1);
+        OrderDao orderDao = new OrderDao();
+        List<Order> test = new ArrayList<>();
+        test.add(order);
+        List<Order> orders = orderDao.getAll(0,1);
         List<DishIngredient> dishIngredients = new ArrayList<>();
         Dish dish = new Dish(1,"Hot Dog", dishIngredients);
-        DishOrder dishOrder = new DishOrder(1,dish,2.0,order);
+        DishOrder dishOrder = new DishOrder(1,dish,2.0,11000.00,order);
         List<DishOrder> dishOrders = new ArrayList<>();
         dishOrders.add(dishOrder);
 
+
         DishOrderDao dishOrderDao = new DishOrderDao();
         dishOrderDao.saveAll(dishOrders);
+        order.addDishOrder(dishOrder);
+        System.out.println(test);
+        /*DishDao dishDao = new DishDao();
+        List<Dish> dishes = dishDao.getAll(1,4);
+        Dish dish = dishDao.findById(1);
 
-
+        System.out.println(dish);*/
     }
 }

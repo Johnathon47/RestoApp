@@ -1,26 +1,16 @@
 package entity;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 
 public class Order {
     private long id;
-    private  TableNumber tableNumber;
+    private TableNumber tableNumber;
     private Double amountPaid;
     private Double amountDue;
     private Instant customerArrivalDatetime;
     private List<DishOrder> dishOrders;
-
-    /*public List<DishOrder> addDishOrders(List<DishOrder> dishOrders) {
-
-    }
-
-    public OrderPaymentStatus getPaymentStatus(){
-    }
-
-    public Double getTotalPrice(){
-    }
-     */
 
     public Order(Instant customerArrivalDatetime, Double amountDue, Double amountPaid, TableNumber tableNumber, long id) {
         this.customerArrivalDatetime = customerArrivalDatetime;
@@ -28,8 +18,10 @@ public class Order {
         this.amountPaid = amountPaid;
         this.tableNumber = tableNumber;
         this.id = id;
+        this.dishOrders = new ArrayList<>();  // Initialise la liste des DishOrder
     }
 
+    // Getters et setters
     public long getId() {
         return id;
     }
@@ -70,6 +62,7 @@ public class Order {
         this.customerArrivalDatetime = customerArrivalDatetime;
     }
 
+    // Liste des DishOrder
     public List<DishOrder> getDishOrders() {
         return dishOrders;
     }
@@ -78,15 +71,24 @@ public class Order {
         this.dishOrders = dishOrders;
     }
 
+    // Ajout d'un DishOrder et gestion de la relation bidirectionnelle
+    public void addDishOrder(DishOrder dishOrder) {
+        if (this.dishOrders == null) {
+            this.dishOrders = new ArrayList<>();
+        }
+        this.dishOrders.add(dishOrder);
+        dishOrder.setOrder(this);  // Relation bidirectionnelle : lier le DishOrder à cet Order
+    }
+
     @Override
     public String toString() {
         return "Order{" +
-                "id=" + id +
-                ", tableNumber=" + tableNumber +
-                ", amountPaid=" + amountPaid +
-                ", amountDue=" + amountDue +
-                ", customerArrivalDatetime=" + customerArrivalDatetime +
-                ", dishOrders=" + dishOrders +
-                '}';
+               "id=" + id +
+               ", tableNumber=" + tableNumber +
+               ", amountPaid=" + amountPaid +
+               ", amountDue=" + amountDue +
+               ", customerArrivalDatetime=" + customerArrivalDatetime +
+               ", dishOrders=" + dishOrders +
+               '}';
     }
 }

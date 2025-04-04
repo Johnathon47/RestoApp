@@ -21,7 +21,6 @@ class IngredientDaoTest {
         List<Ingredient> actual = subject.getAll(1,1);
 
         assertTrue(actual.contains(expecteIngredient));
-        //assertEquals(expecteIngredient, actual);
     }
 
     private Ingredient saucisse() {

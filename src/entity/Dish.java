@@ -59,7 +59,7 @@ public class Dish {
         return "Dish{" +
                 " \n  id=" + id +
                 ",\n name='" + name + '\'' +
-                ",\n unitPrice=" +
+                ",\n unitPrice=" + getIngredientCost() +
                 ",\n ingredientList=" + ingredientList +
                 '}';
     }

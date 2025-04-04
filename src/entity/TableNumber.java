@@ -1,5 +1,5 @@
 package entity;
 
 public enum TableNumber {
-    TABLE_1, TABLE_2, TABLE_3
+    TABLE1, TABLE2, TABLE3
 }
