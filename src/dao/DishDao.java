@@ -18,7 +18,13 @@ public class DishDao implements CrudOperations<Dish>{
     private final DataSource dataSource = new DataSource();
 
     private void updateUnitPrice(Dish dish, Connection connection) throws SQLException {
-        String updateQuery = "UPDATE dish SET unit_price = ? WHERE id = ?";
+        if (dish.getIngredientList().isEmpty()) {
+            System.out.println("La liste des ingredients est vide"); ;
+        }
+        String updateQuery =
+                            """
+                                UPDATE dish SET unit_price = ? WHERE id = ?;
+                            """;
 
         try (PreparedStatement updateStatement = connection.prepareStatement(updateQuery)) {
             BigDecimal calculatedPrice = dish.getIngredientCost();
@@ -30,10 +36,16 @@ public class DishDao implements CrudOperations<Dish>{
 
     @Override
     public List<Dish> saveAll(List<Dish> dishes) {
-        String dishQuery = "INSERT INTO dish (id, name) VALUES (?, ?) " +
-                "ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name";
-        String dishIngredientQuery = "INSERT INTO dish_ingredient (id_dish, id_ingredient, required_quantity, unit) " +
-                "VALUES (?, ?, ?, ?) ON CONFLICT DO NOTHING";
+        String dishQuery =
+                """
+                    INSERT INTO dish (id, name) VALUES (?, ?)
+                    ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name;
+                """;
+        String dishIngredientQuery =
+                        """
+                            INSERT INTO dish_ingredient (id_dish, id_ingredient, required_quantity, unit)
+                            VALUES (?, ?, ?, ?) ON CONFLICT DO NOTHING;
+                        """;
 
         try (Connection connection = dataSource.getConnection();
              PreparedStatement dishStatement = connection.prepareStatement(dishQuery);
@@ -66,14 +78,17 @@ public class DishDao implements CrudOperations<Dish>{
     @Override
     public List<Dish> getAll(int offset, int limit) {
         List<Dish> dishes = new ArrayList<>();
-        Map<Integer, Dish> dishMap = new HashMap<>();
+        Map<Long, Dish> dishMap = new HashMap<>();
 
-        String sql = "SELECT dish.id, dish.name, dish_ingredient.required_quantity, dish_ingredient.unit, " +
-                "ingredient.name AS ingredientName, ingredient.unit_price " +
-                "FROM dish " +
-                "INNER JOIN dish_ingredient ON dish.id = dish_ingredient.id_dish " +
-                "INNER JOIN ingredient ON dish_ingredient.id_ingredient = ingredient.id " +
-                "ORDER BY dish.id LIMIT ? OFFSET ?";
+        String sql =
+                    """
+                        SELECT dish.id, dish.name AS named, dish_ingredient.required_quantity, dish_ingredient.unit,
+                        ingredient.name AS ingredientName, dish.unit_price, ingredient.unit_price AS up
+                        FROM dish
+                        INNER JOIN dish_ingredient ON dish.id = dish_ingredient.id_dish
+                        INNER JOIN ingredient ON dish_ingredient.id_ingredient = ingredient.id
+                        ORDER BY dish.id LIMIT ? OFFSET ?;
+                    """;
 
         try (Connection connection = dataSource.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
@@ -83,22 +98,21 @@ public class DishDao implements CrudOperations<Dish>{
 
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 while (resultSet.next()) {
-                    int dishId = resultSet.getInt("id");
+                    Long dishId = resultSet.getLong("id");
                     Dish dish = dishMap.get(dishId);
                     if (dish == null) {
                         dish = new Dish();
                         dish.setId(dishId);
-                        dish.setName(resultSet.getString("name"));
+                        dish.setName(resultSet.getString("named"));
                         dish.setIngredientList(new ArrayList<>());
                         dishMap.put(dishId, dish);
                         dishes.add(dish);
                     }
-
                     // Ajouter l'ingrédient au plat
                     String ingredientName = resultSet.getString("ingredientName");
                     BigDecimal requiredQuantity = resultSet.getBigDecimal("required_quantity");
                     String unit = resultSet.getString("unit");
-                    BigDecimal unitPrice = resultSet.getBigDecimal("unit_price");
+                    BigDecimal unitPrice = resultSet.getBigDecimal("up");
 
                     Ingredient ingredient = new Ingredient();
                     ingredient.setName(ingredientName);
@@ -107,6 +121,11 @@ public class DishDao implements CrudOperations<Dish>{
 
                     DishIngredient dishIngredient = new DishIngredient(ingredient, requiredQuantity, Unit.valueOf(unit));
                     dish.getIngredientList().add(dishIngredient);
+                }
+
+                // mettre à jour l'unit price
+                for (Dish dish : dishes) {
+                    updateUnitPrice(dish, connection);
                 }
             }
         } catch (SQLException e) {
@@ -119,12 +138,15 @@ public class DishDao implements CrudOperations<Dish>{
 
     @Override
     public Dish findById(long dishId) {
-        String sql = "SELECT dish.id, dish.name, dish.unit_price, ingredient.name AS ingredientName, \n" +
-                "       dish_ingredient.required_quantity, dish_ingredient.unit \n" +
-                "FROM dish \n" +
-                "LEFT JOIN dish_ingredient ON dish.id = dish_ingredient.id_dish \n" +
-                "LEFT JOIN ingredient ON dish_ingredient.id_ingredient = ingredient.id \n" +
-                "WHERE dish.id = ?;";
+        String sql =
+                """
+                    SELECT dish.id, dish.name AS named, dish_ingredient.required_quantity, dish_ingredient.unit,
+                        ingredient.name AS ingredientName, dish.unit_price, ingredient.unit_price AS up
+                        FROM dish
+                        INNER JOIN dish_ingredient ON dish.id = dish_ingredient.id_dish
+                        INNER JOIN ingredient ON dish_ingredient.id_ingredient = ingredient.id
+                        WHERE dish.id = ?;
+                """;
 
         try (Connection connection = dataSource.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
@@ -138,20 +160,23 @@ public class DishDao implements CrudOperations<Dish>{
                     if (dish == null) {
                         dish = new Dish();
                         dish.setId(resultSet.getInt("id"));
-                        dish.setName(resultSet.getString("name"));
+                        dish.setName(resultSet.getString("named"));
 
                         dish.setIngredientList(new ArrayList<>()); // Initialisation de la liste
                     }
 
                     // Vérifier si l'ingrédient existe avant d'ajouter
-                    Ingredient ingredientName = (Ingredient) resultSet.getObject("ingredientName");
+                    String ingredientName = resultSet.getString("ingredientName");
                     if (ingredientName != null) {
+                        Ingredient ingredient = new Ingredient();
+                        ingredient.setName(ingredientName);
+                        ingredient.setUnitPrice(resultSet.getBigDecimal("up"));
                         BigDecimal requiredQuantity = resultSet.getBigDecimal("required_quantity");
                         String unit = resultSet.getString("unit");
-
-                        DishIngredient dishIngredient = new DishIngredient(ingredientName, requiredQuantity, Unit.valueOf(unit));
+                        DishIngredient dishIngredient = new DishIngredient(ingredient, requiredQuantity, Unit.valueOf(unit));
                         dish.getIngredientList().add(dishIngredient);
                     }
+
                 }
                 return dish; // Retourne null si aucun plat n'est trouvé
             }
@@ -165,7 +190,10 @@ public class DishDao implements CrudOperations<Dish>{
 
     @Override
     public boolean deleteOperation(long id) {
-        String query = "DELETE FROM dish WHERE id = ?";
+        String query =
+                """
+                    DELETE FROM dish WHERE id = ?;
+                """;
 
         try (PreparedStatement preparedStatement = dataSource.getConnection().prepareStatement(query)) {
             preparedStatement.setLong(1, id);

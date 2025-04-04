@@ -5,7 +5,6 @@ import entity.Dish;
 import entity.DishOrder;
 import entity.Order;
 
-import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -18,8 +17,8 @@ public class DishOrderDao implements CrudOperations<DishOrder> {
 
     @Override
     public List<DishOrder> saveAll(List<DishOrder> dishOrders) {
-        String query = "INSERT INTO dish_order (id, dish_id, quantitytoorder, orderid) " +
-                "VALUES (?, ?, ?, ?) " +
+        String query = "INSERT INTO dish_order (id, dish_id, quantitytoorder, price, orderid) " +
+                "VALUES (?, ?, ?, ?, ?) " +
                 "ON CONFLICT (id) DO UPDATE " +
                 "SET dish_id = EXCLUDED.dish_id, " +
                 "    quantitytoorder = EXCLUDED.quantitytoorder, " +
@@ -32,7 +31,8 @@ public class DishOrderDao implements CrudOperations<DishOrder> {
                 statement.setLong(1, dishOrder.getId());
                 statement.setLong(2, dishOrder.getDish().getId()); // Assurez-vous que DishOrder ait une instance Dish
                 statement.setDouble(3, dishOrder.getQuantityToOrder());
-                statement.setLong(4, dishOrder.getOrder().getId());
+                statement.setDouble(4, dishOrder.getPrice());
+                statement.setLong(5, dishOrder.getOrder().getId());
                 statement.executeUpdate(); // Exécution de la requête
             }
             return dishOrders;
@@ -44,7 +44,7 @@ public class DishOrderDao implements CrudOperations<DishOrder> {
 
     @Override
     public List<DishOrder> getAll(int offset, int limit) {
-        String query = "SELECT dish_order.id, dish.name, quantitytoorder, orderid FROM dish_order INNER JOIN dish ON dish_order.dish_id = dish.id GROUP BY dish_order.id, dish.name LIMIT ? OFFSET ?";
+        String query = "SELECT dish_order.id, dish.name AS name, quantitytoorder, price, orderid FROM dish_order INNER JOIN dish ON dish_order.dish_id = dish.id GROUP BY dish_order.id, dish.name LIMIT ? OFFSET ?";
         List<DishOrder> dishOrders = new ArrayList<>();
 
         try (Connection connection = dataSource.getConnection();
@@ -57,8 +57,9 @@ public class DishOrderDao implements CrudOperations<DishOrder> {
             while (resultSet.next()) {
                 DishOrder dishOrder = new DishOrder(
                         resultSet.getLong("id"),
-                        (Dish) resultSet.getObject("dish_id"),
+                        (Dish) resultSet.getObject("name"),
                         resultSet.getDouble("quantitytoorder"),
+                        resultSet.getDouble("price"),
                         (Order) resultSet.getObject("orderid")
                 );
                 dishOrders.add(dishOrder);

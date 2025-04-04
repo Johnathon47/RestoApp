@@ -1,7 +1,9 @@
 package dao;
 
 import db.DataSource;
+import entity.Dish;
 import entity.DishAvailability;
+import org.intellij.lang.annotations.Language;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -15,16 +17,22 @@ public class DishAvailabailityDao {
 
     public List<DishAvailability> findAll() {
         List<DishAvailability> availabilities = new ArrayList<>();
-        String requestSql = "SELECT dish.name AS name, availability FROM dish_availability\n"+
-                            "INNER JOIN dish ON dish_availability.dish_id = dish.id\n"+
-                            "GROUP BY dish.name, availability";
+        String requestSql = """
+                                SELECT dish_id, dish.name AS name, dish.unit_price, availability FROM dish_availability
+                                INNER JOIN dish ON dish_availability.dish_id = dish.id
+                                GROUP BY dish_id, dish.name, dish.unit_price, availability;
+                            """;
 
         try(Connection connection = dataSource.getConnection();
             PreparedStatement preparedStatement = connection.prepareStatement(requestSql)) {
             ResultSet resultSet = preparedStatement.executeQuery();
                 while (resultSet.next()) {
                     DishAvailability availability = new DishAvailability();
-                    availability.setName(resultSet.getString("name"));
+                    Dish dish = new Dish();
+                    dish.setId(resultSet.getLong("dish_id"));
+                    dish.setName(resultSet.getString("name"));
+
+                    availability.setDish(dish);
                     availability.setAvailability(resultSet.getDouble("availability"));
                     availabilities.add(availability);
                 }
