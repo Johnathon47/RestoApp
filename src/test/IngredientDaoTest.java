@@ -18,7 +18,7 @@ class IngredientDaoTest {
     void read_all_ingredient_ok() {
         Ingredient expecteIngredient = saucisse();
 
-        List<Ingredient> actual = subject.getAll(1,1);
+        List<Ingredient> actual = subject.getAll(1,5);
 
         assertTrue(actual.contains(expecteIngredient));
     }
