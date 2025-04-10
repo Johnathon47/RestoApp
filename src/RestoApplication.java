@@ -1,7 +1,4 @@
-import dao.DishDao;
-import dao.DishOrderDao;
-import dao.IngredientDao;
-import dao.OrderDao;
+import dao.*;
 import entity.*;
 
 import java.math.BigDecimal;
@@ -36,7 +33,7 @@ public class RestoApplication {
         dishDao.saveAll(Arrays.asList(dish));*/
 
         //dishDao.deleteOperation(3);
-        Order order = new Order(Instant.now(),11000.00,13000.00,TableNumber.TABLE1,1);
+        /*Order order = new Order(Instant.now(),11000.00,13000.00,TableNumber.TABLE1,1);
         OrderDao orderDao = new OrderDao();
         List<Order> test = new ArrayList<>();
         test.add(order);
@@ -51,11 +48,20 @@ public class RestoApplication {
         DishOrderDao dishOrderDao = new DishOrderDao();
         dishOrderDao.saveAll(dishOrders);
         order.addDishOrder(dishOrder);
-        System.out.println(test);
+        System.out.println(test);**/
         /*DishDao dishDao = new DishDao();
         List<Dish> dishes = dishDao.getAll(1,4);
         Dish dish = dishDao.findById(1);
 
         System.out.println(dish);*/
+        /*DishDao dishDao = new DishDao();
+        System.out.println(dishDao.getAll(1,5));*/
+        /*DishAvailabailityDao availabailityDao = new DishAvailabailityDao();
+
+        System.out.println(availabailityDao.findAll());*/
+
+        StockMovementDao stockMovementDao = new StockMovementDao();
+
+        System.out.println(stockMovementDao.stockMovementList());
     }
 }
