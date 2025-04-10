@@ -45,7 +45,7 @@ public class IngredientDao implements CrudOperations<Ingredient>{
 
     @Override
     public List<Ingredient> getAll(int offset, int limit) {
-        String sql = "SELECT i.id, i.name, i.unit_price, i.unit, i.update_datetime FROM ingredient i ORDER BY i.id LIMIT ? OFFSET ?;";
+        String sql = "SELECT i.id, i.name, i.unit_price, i.unit, i.update_datetime FROM ingredient i ORDER BY i.name LIMIT ? OFFSET ?;";
         try (Connection connection = dataSource.getConnection()) {
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setInt(1, limit);
