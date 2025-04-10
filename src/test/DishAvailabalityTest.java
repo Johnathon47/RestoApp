@@ -21,7 +21,7 @@ public class DishAvailabalityTest {
 
         List<DishAvailability> actual = subject.findAll();
 
-        assertTrue(actual.contains(expecteDishAvailability));
+        assertEquals(expecteDishAvailability, actual);
     }
 
     private DishAvailability availability_hot_dog() {
