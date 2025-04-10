@@ -18,7 +18,7 @@ public class DishAvailabailityDao {
     public List<DishAvailability> findAll() {
         List<DishAvailability> availabilities = new ArrayList<>();
         String requestSql = """
-                                SELECT dish_id, dish.name AS name, dish.unit_price, availability FROM dish_availability
+                                SELECT dish_id, dish.name AS name, dish.unit_price AS unit_price, availability FROM dish_availability
                                 INNER JOIN dish ON dish_availability.dish_id = dish.id
                                 GROUP BY dish_id, dish.name, dish.unit_price, availability;
                             """;
@@ -31,6 +31,8 @@ public class DishAvailabailityDao {
                     Dish dish = new Dish();
                     dish.setId(resultSet.getLong("dish_id"));
                     dish.setName(resultSet.getString("name"));
+                    dish.setIngredientList(new ArrayList<>());
+
 
                     availability.setDish(dish);
                     availability.setAvailability(resultSet.getDouble("availability"));
