@@ -2,36 +2,25 @@ package test;
 
 import dao.IngredientDao;
 import entity.Ingredient;
-import entity.Unit;
 import org.junit.jupiter.api.Test;
 
-import java.math.BigDecimal;
-import java.sql.Timestamp;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class IngredientDaoTest {
     IngredientDao subject = new IngredientDao();
 
     @Test
     void read_all_ingredient_ok() {
-        Ingredient expecteIngredient = saucisse();
+        List<Ingredient> actual = subject.getAll(1, 5);
 
-        List<Ingredient> actual = subject.getAll(1,5);
+        boolean containsSaucisse = actual.stream()
+                .anyMatch(ingredient ->
+                        ingredient.getId() == 1L &&
+                                "Saucisse".equals(ingredient.getName())
+                );
 
-        assertTrue(actual.contains(expecteIngredient));
-    }
-
-    private Ingredient saucisse() {
-        Ingredient expectedIngredient = new Ingredient();
-
-        expectedIngredient.setId(1);
-        expectedIngredient.setName("Saucisse");
-        expectedIngredient.setUnitPrice(BigDecimal.valueOf(20));
-        expectedIngredient.setUnit(Unit.G);
-        expectedIngredient.setUpdateDateTime(Timestamp.valueOf("2025-01-01 00:00:00"));
-
-        return expectedIngredient;
+        assertTrue(containsSaucisse, "L'ingrédient 'Saucisse' avec l'id 1 n'a pas été trouvé.");
     }
 }

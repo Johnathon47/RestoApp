@@ -32,19 +32,13 @@ public class Dish {
     }
 
     public BigDecimal getIngredientCost() {
-        BigDecimal total = BigDecimal.valueOf(0);
         return ingredientList.stream()
                 .map(dishIngredient -> dishIngredient.getIngredient()
-                        .getUnitPrice()
+                        .getCurrentPrice() // 🔁 on utilise cette méthode ici
                         .multiply(dishIngredient.getRequiredQuantity()))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
-        /*for (DishIngredient dishIngredient: ingredientList) {
-            Ingredient ingredient = dishIngredient.getIngredient();
-            BigDecimal ingredientCost = ingredient.getUnitPrice().multiply(dishIngredient.getRequiredQuantity());
-            total = total.add(ingredientCost);
-        }
-        return total;*/
     }
+
 
     public List<DishIngredient> getIngredientList() {
         return ingredientList;

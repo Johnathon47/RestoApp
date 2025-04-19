@@ -1,4 +1,2 @@
-SELECT dish."name", ingredient."name", required_quantity, dish_ingredient.unit FROM dish_ingredient
-        INNER JOIN ingredient ON dish_ingredient.id_ingredient = ingredient."id"
-        INNER JOIN dish ON dish_ingredient.id_dish = dish."id"
-        ORDER BY ingredient."id";
+SELECT dish.name, availability, dish.unit_price FROM dish_availability
+INNER JOIN dish ON dish_availability.dish_id = dish."id" ORDER BY dish."name";

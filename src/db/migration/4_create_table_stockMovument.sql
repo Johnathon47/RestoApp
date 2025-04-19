@@ -1,18 +1,9 @@
-do
-$$
-    begin
-        if not exists(SELECT FROM pg_type WHERE typname = 'movement_type') then
-            CREATE TYPE "movement_type" AS ENUM ('ENTRY', 'EXIT');
-        end if;
-    end
-$$;
-
-CREATE TABLE if not exists stock_movement (
+CREATE TABLE public.stock_movement (
     id BIGINT PRIMARY KEY,
-    ingredient_id BIGINT,
-    movement_type movement_type,
-    quantity NUMERIC,
-    unit unit,
-    movement_date TIMESTAMP,
-    FOREIGN KEY (ingredient_id) REFERENCES ingredient(id)
+    ingredient_id BIGINT NOT NULL,
+    movement_type movement_type NOT NULL,
+    quantity NUMERIC NOT NULL,
+    unit VARCHAR(255),
+    movement_date TIMESTAMP WITHOUT TIME ZONE,
+    FOREIGN KEY (ingredient_id) REFERENCES public.ingredient(id)
 );

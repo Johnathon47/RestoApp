@@ -48,20 +48,28 @@ public class RestoApplication {
         DishOrderDao dishOrderDao = new DishOrderDao();
         dishOrderDao.saveAll(dishOrders);
         order.addDishOrder(dishOrder);
-        System.out.println(test);**/
+        System.out.println(test);
         /*DishDao dishDao = new DishDao();
         List<Dish> dishes = dishDao.getAll(1,4);
         Dish dish = dishDao.findById(1);
 
-        System.out.println(dish);*/
-        /*DishDao dishDao = new DishDao();
-        System.out.println(dishDao.getAll(1,5));*/
+        System.out.println(dish);**/
+        DishDao dishDao = new DishDao();
+        System.out.println(dishDao.getAll(1,5));
         /*DishAvailabailityDao availabailityDao = new DishAvailabailityDao();
 
         System.out.println(availabailityDao.findAll());*/
 
-        StockMovementDao stockMovementDao = new StockMovementDao();
+        //StockMovementDao stockMovementDao = new StockMovementDao();
 
-        System.out.println(stockMovementDao.stockMovementList());
+        //System.out.println(stockMovementDao.stockMovementList());
+
+        /*IngredientPriceDao ingredientPriceDao = new IngredientPriceDao();
+
+        System.out.println(ingredientPriceDao.findAllForIngredient(1));*/
+
+        /*IngredientDao ingredientDao = new IngredientDao();
+
+        System.out.println(ingredientDao.getAll(1,5));*/
     }
 }

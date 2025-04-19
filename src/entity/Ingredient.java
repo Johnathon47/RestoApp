@@ -1,35 +1,38 @@
 package entity;
 
 import java.math.BigDecimal;
-import java.sql.Timestamp;
-import java.util.Objects;
+import java.util.List;
 
 public class Ingredient {
-    private long id;
+    private Long id;
     protected String name;
-    private BigDecimal unitPrice;
-    private Unit unit;
-    private Timestamp updateDateTime;
+    private List<IngredientPrice> priceHistory;
 
-                                                                                                                                    public Ingredient(long id, String name, BigDecimal unitPrice, Unit unit, Timestamp updateDateTime) {
+    public Ingredient() {
+    }
+
+    public Ingredient(Long id, String name) {
         this.id = id;
         this.name = name;
-        this.unitPrice = unitPrice;
-        this.unit = unit;
-        this.updateDateTime = updateDateTime;
     }
 
-    public Ingredient (String name) {
+    public Ingredient(Long id, String name, List<IngredientPrice> priceHistory) {
+        this.id = id;
         this.name = name;
+        this.priceHistory = priceHistory;
     }
 
-    public Ingredient() {}
+    public BigDecimal getCurrentPrice() {
+        IngredientPrice latest = getLatestPrice();
+        return latest != null ? latest.getPrice() : BigDecimal.ZERO;
+    }
 
-    public long getId() {
+
+    public Long getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -41,50 +44,28 @@ public class Ingredient {
         this.name = name;
     }
 
-    public BigDecimal getUnitPrice() {
-        return unitPrice;
+    public List<IngredientPrice> getPriceHistory() {
+        return priceHistory;
     }
 
-    public void setUnitPrice(BigDecimal unitPrice) {
-        this.unitPrice = unitPrice;
+    public void setPriceHistory(List<IngredientPrice> priceHistory) {
+        this.priceHistory = priceHistory;
     }
 
-    public Unit getUnit() {
-        return unit;
-    }
+    public IngredientPrice getLatestPrice() {
+        if (priceHistory == null || priceHistory.isEmpty()) return null;
 
-    public void setUnit(Unit unit) {
-        this.unit = unit;
-    }
-
-    public Timestamp getUpdateDateTime() {
-        return updateDateTime;
-    }
-
-    public void setUpdateDateTime(Timestamp updateDateTime) {
-        this.updateDateTime = updateDateTime;
+        return priceHistory.stream()
+                .max((p1, p2) -> p1.getUpdateDateTime().compareTo(p2.getUpdateDateTime()))
+                .orElse(null);
     }
 
     @Override
     public String toString() {
         return "Ingredient{" +
-                "\n  id=" + id +
-                ",\n name='" + name + '\'' +
-                ",\n unitPrice=" + unitPrice +
-                ",\n unit=" + unit +
-                ",\n updateDateTime=" + updateDateTime +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", priceHistory=" + priceHistory +
                 '}'+"\n";
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
-        Ingredient that = (Ingredient) o;
-        return id == that.id && Objects.equals(unitPrice, that.unitPrice) && Objects.equals(name, that.name) && unit == that.unit && Objects.equals(updateDateTime, that.updateDateTime);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, name, unitPrice, unit, updateDateTime);
     }
 }

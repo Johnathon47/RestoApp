@@ -29,10 +29,10 @@ public class DishAvailabalityTest {
         Dish expectedDish = new Dish();
         List<DishIngredient> expectedDishIngredients = new ArrayList<>();
 
-        Ingredient ingredient1 = new Ingredient(1,"Saucisse", new BigDecimal("20"), Unit.G, Timestamp.valueOf("2025-01-01 00:00:00"));
-        Ingredient ingredient2 = new Ingredient(2,"Huile", new BigDecimal("10000"), Unit.L, Timestamp.valueOf("2025-01-01 00:00:00"));
-        Ingredient ingredient3 = new Ingredient(3,"Pain", new BigDecimal("1000"), Unit.U, Timestamp.valueOf("2025-01-01 00:00:00"));
-        Ingredient ingredient4 = new Ingredient(4,"Oeuf", new BigDecimal("1000"), Unit.U, Timestamp.valueOf("2025-02-28 00:00:00"));
+        Ingredient ingredient1 = new Ingredient(1L,"Saucisse");
+        Ingredient ingredient2 = new Ingredient(2L,"Huile");
+        Ingredient ingredient3 = new Ingredient(3L,"Pain");
+        Ingredient ingredient4 = new Ingredient(4L,"Oeuf");
 
         DishIngredient dishIngredient1 = new DishIngredient(ingredient1,new BigDecimal("100"),Unit.G);
         DishIngredient dishIngredient2 = new DishIngredient(ingredient2,new BigDecimal("0.15"),Unit.L);

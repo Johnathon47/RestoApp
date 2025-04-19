@@ -3,7 +3,7 @@ package entity;
 import java.math.BigDecimal;
 import java.util.Objects;
 
-public class DishIngredient extends Ingredient {
+public class DishIngredient {
     private Ingredient ingredient;
     private BigDecimal requiredQuantity;
     private Unit unit;
@@ -32,12 +32,10 @@ public class DishIngredient extends Ingredient {
         this.requiredQuantity = requiredQuantity;
     }
 
-    @Override
     public Unit getUnit() {
         return unit;
     }
 
-    @Override
     public void setUnit(Unit unit) {
         this.unit = unit;
     }

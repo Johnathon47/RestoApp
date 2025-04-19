@@ -1,6 +1,5 @@
-CREATE TABLE if not exists dish
-    (
-        id BIGINT PRIMARY KEY,
-        name VARCHAR(255),
-        unit_price NUMERIC
-    );
+CREATE TABLE public.dish (
+    id BIGINT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    unit_price NUMERIC NOT NULL
+);

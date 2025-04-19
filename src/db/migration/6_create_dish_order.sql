@@ -1,9 +1,10 @@
-CREATE TABLE if not exists dish_order (
+CREATE TABLE public.dish_order (
     id BIGINT PRIMARY KEY,
     dish_id BIGINT NOT NULL,
-    quantityToOrder NUMERIC NOT NULL,
+    quantitytoorder NUMERIC NOT NULL,
+    orderid BIGINT NOT NULL,
     price NUMERIC NOT NULL,
-    orderId BIGINT NOT NULL,
-    FOREIGN KEY (dish_id) REFERENCES dish(id),
-    FOREIGN KEY (orderId) REFERENCES "order"(id)
+    status order_dish_status NOT NULL DEFAULT 'CREATED',
+    FOREIGN KEY (dish_id) REFERENCES public.dish(id),
+    FOREIGN KEY (orderid) REFERENCES public.order(id)
 );
