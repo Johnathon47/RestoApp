@@ -2,32 +2,27 @@ package dao;
 
 import db.DataSource;
 import entity.*;
-import entity.DishIngredient;
 
 import java.math.BigDecimal;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.sql.*;
+import java.util.*;
 
-public class DishDao implements CrudOperations<Dish>{
+public class DishDao implements CrudOperations<Dish> {
+
     private final DataSource dataSource = new DataSource();
+    private final IngredientPriceDao ingredientPriceDao = new IngredientPriceDao(); // Utilisé pour récupérer l'historique
 
     private void updateUnitPrice(Dish dish, Connection connection) throws SQLException {
         if (dish.getIngredientList().isEmpty()) {
-            System.out.println("La liste des ingredients est vide"); ;
+            System.out.println("La liste des ingrédients est vide");
         }
         String updateQuery =
-                            """
-                                UPDATE dish SET unit_price = ? WHERE id = ?;
-                            """;
+                """
+                    UPDATE dish SET unit_price = ? WHERE id = ?;
+                """;
 
         try (PreparedStatement updateStatement = connection.prepareStatement(updateQuery)) {
-            BigDecimal calculatedPrice = dish.getIngredientCost();
+            BigDecimal calculatedPrice = dish.getIngredientCost(); // utilise getLatestPrice() des ingrédients
             updateStatement.setBigDecimal(1, calculatedPrice);
             updateStatement.setLong(2, dish.getId());
             updateStatement.executeUpdate();
@@ -41,11 +36,12 @@ public class DishDao implements CrudOperations<Dish>{
                     INSERT INTO dish (id, name) VALUES (?, ?)
                     ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name;
                 """;
+
         String dishIngredientQuery =
-                        """
-                            INSERT INTO dish_ingredient (id_dish, id_ingredient, required_quantity, unit)
-                            VALUES (?, ?, ?, ?) ON CONFLICT DO NOTHING;
-                        """;
+                """
+                    INSERT INTO dish_ingredient (id_dish, id_ingredient, required_quantity, unit)
+                    VALUES (?, ?, ?, ?) ON CONFLICT DO NOTHING;
+                """;
 
         try (Connection connection = dataSource.getConnection();
              PreparedStatement dishStatement = connection.prepareStatement(dishQuery);
@@ -64,16 +60,14 @@ public class DishDao implements CrudOperations<Dish>{
                     dishIngredientStatement.executeUpdate();
                 }
 
-                // Mise à jour du prix après insertion
                 updateUnitPrice(dish, connection);
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+
         return dishes;
     }
-
-
 
     @Override
     public List<Dish> getAll(int offset, int limit) {
@@ -81,14 +75,14 @@ public class DishDao implements CrudOperations<Dish>{
         Map<Long, Dish> dishMap = new HashMap<>();
 
         String sql =
-                    """
-                        SELECT dish.id, dish.name AS named, dish_ingredient.required_quantity, dish_ingredient.unit,
-                        ingredient.name AS ingredientName, dish.unit_price, ingredient.unit_price AS up
-                        FROM dish
-                        INNER JOIN dish_ingredient ON dish.id = dish_ingredient.id_dish
-                        INNER JOIN ingredient ON dish_ingredient.id_ingredient = ingredient.id
-                        ORDER BY dish.id LIMIT ? OFFSET ?;
-                    """;
+                """
+                    SELECT dish.id AS dish_id, dish.name AS dish_name, dish_ingredient.required_quantity, dish_ingredient.unit,
+                           ingredient.id AS id_ingredient, ingredient.name AS ingredient_name
+                    FROM dish
+                    INNER JOIN dish_ingredient ON dish.id = dish_ingredient.id_dish
+                    INNER JOIN ingredient ON dish_ingredient.id_ingredient = ingredient.id
+                    ORDER BY dish.id LIMIT ? OFFSET ?;
+                """;
 
         try (Connection connection = dataSource.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
@@ -98,54 +92,56 @@ public class DishDao implements CrudOperations<Dish>{
 
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 while (resultSet.next()) {
-                    Long dishId = resultSet.getLong("id");
+                    Long dishId = resultSet.getLong("dish_id");
                     Dish dish = dishMap.get(dishId);
+
                     if (dish == null) {
                         dish = new Dish();
                         dish.setId(dishId);
-                        dish.setName(resultSet.getString("named"));
+                        dish.setName(resultSet.getString("dish_name"));
                         dish.setIngredientList(new ArrayList<>());
                         dishMap.put(dishId, dish);
                         dishes.add(dish);
                     }
-                    // Ajouter l'ingrédient au plat
-                    String ingredientName = resultSet.getString("ingredientName");
-                    BigDecimal requiredQuantity = resultSet.getBigDecimal("required_quantity");
-                    String unit = resultSet.getString("unit");
-                    BigDecimal unitPrice = resultSet.getBigDecimal("up");
 
                     Ingredient ingredient = new Ingredient();
-                    ingredient.setName(ingredientName);
-                    ingredient.setUnitPrice(unitPrice);  // Set the unit price from database
-                    ingredient.setUnit(Unit.valueOf(unit));
+                    Long ingredientId = resultSet.getLong("id_ingredient");
+                    ingredient.setId(ingredientId);
+                    ingredient.setName(resultSet.getString("ingredient_name"));
+
+                    // Historique des prix
+                    List<IngredientPrice> priceHistory = ingredientPriceDao.findAllForIngredient(ingredientId);
+                    ingredient.setPriceHistory(priceHistory);
+
+                    BigDecimal requiredQuantity = resultSet.getBigDecimal("required_quantity");
+                    String unit = resultSet.getString("unit");
 
                     DishIngredient dishIngredient = new DishIngredient(ingredient, requiredQuantity, Unit.valueOf(unit));
                     dish.getIngredientList().add(dishIngredient);
                 }
 
-                // mettre à jour l'unit price
                 for (Dish dish : dishes) {
                     updateUnitPrice(dish, connection);
                 }
             }
+
         } catch (SQLException e) {
-            throw new RuntimeException("Error fetching dishes", e);
+            throw new RuntimeException("Erreur lors de la récupération des plats", e);
         }
 
         return dishes;
     }
 
-
     @Override
     public Dish findById(long dishId) {
         String sql =
                 """
-                    SELECT dish.id, dish.name AS named, dish_ingredient.required_quantity, dish_ingredient.unit,
-                        ingredient.name AS ingredientName, dish.unit_price, ingredient.unit_price AS up
-                        FROM dish
-                        INNER JOIN dish_ingredient ON dish.id = dish_ingredient.id_dish
-                        INNER JOIN ingredient ON dish_ingredient.id_ingredient = ingredient.id
-                        WHERE dish.id = ?;
+                    SELECT dish.id AS dish_id, dish.name AS dish_name, dish_ingredient.required_quantity, dish_ingredient.unit,
+                           ingredient.id AS id_ingredient, ingredient.name AS ingredient_name
+                    FROM dish
+                    INNER JOIN dish_ingredient ON dish.id = dish_ingredient.id_dish
+                    INNER JOIN ingredient ON dish_ingredient.id_ingredient = ingredient.id
+                    WHERE dish.id = ?;
                 """;
 
         try (Connection connection = dataSource.getConnection();
@@ -159,34 +155,34 @@ public class DishDao implements CrudOperations<Dish>{
                 while (resultSet.next()) {
                     if (dish == null) {
                         dish = new Dish();
-                        dish.setId(resultSet.getInt("id"));
-                        dish.setName(resultSet.getString("named"));
-
-                        dish.setIngredientList(new ArrayList<>()); // Initialisation de la liste
+                        dish.setId(resultSet.getLong("dish_id"));
+                        dish.setName(resultSet.getString("dish_name"));
+                        dish.setIngredientList(new ArrayList<>());
                     }
 
-                    // Vérifier si l'ingrédient existe avant d'ajouter
-                    String ingredientName = resultSet.getString("ingredientName");
-                    if (ingredientName != null) {
-                        Ingredient ingredient = new Ingredient();
-                        ingredient.setName(ingredientName);
-                        ingredient.setUnitPrice(resultSet.getBigDecimal("up"));
-                        BigDecimal requiredQuantity = resultSet.getBigDecimal("required_quantity");
-                        String unit = resultSet.getString("unit");
-                        DishIngredient dishIngredient = new DishIngredient(ingredient, requiredQuantity, Unit.valueOf(unit));
-                        dish.getIngredientList().add(dishIngredient);
-                    }
+                    Ingredient ingredient = new Ingredient();
+                    Long ingredientId = resultSet.getLong("id_ingredient");
+                    ingredient.setId(ingredientId);
+                    ingredient.setName(resultSet.getString("ingredient_name"));
 
+                    // Historique des prix
+                    List<IngredientPrice> priceHistory = ingredientPriceDao.findAllForIngredient(ingredientId);
+                    ingredient.setPriceHistory(priceHistory);
+
+                    BigDecimal requiredQuantity = resultSet.getBigDecimal("required_quantity");
+                    String unit = resultSet.getString("unit");
+
+                    DishIngredient dishIngredient = new DishIngredient(ingredient, requiredQuantity, Unit.valueOf(unit));
+                    dish.getIngredientList().add(dishIngredient);
                 }
-                return dish; // Retourne null si aucun plat n'est trouvé
+
+                return dish;
             }
+
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Erreur lors de la recherche du plat", e);
         }
     }
-
-
-
 
     @Override
     public boolean deleteOperation(long id) {
@@ -198,10 +194,9 @@ public class DishDao implements CrudOperations<Dish>{
         try (PreparedStatement preparedStatement = dataSource.getConnection().prepareStatement(query)) {
             preparedStatement.setLong(1, id);
             int rowAffected = preparedStatement.executeUpdate();
-
             return rowAffected > 0;
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Erreur lors de la suppression du plat", e);
         }
     }
 }
